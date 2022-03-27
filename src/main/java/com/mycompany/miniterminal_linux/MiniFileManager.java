@@ -22,17 +22,27 @@ public class MiniFileManager {
         this.ruta=ruta;
     }
 
+    public File getRuta() {
+        return ruta;
+    }
+
     public String getPWD() {
         return ruta.getAbsolutePath();
     }
     
-    public boolean changeDir(File dir){
+    public boolean changeDir(File dir) throws FicheroNoEncontrado{
+        if(!dir.exists()){
+          throw new FicheroNoEncontrado("Ruta al fichero especificado no existe. No se pudo cambiar el directorio activo.");
+        }
         ruta=dir;
         return ruta.exists();
     }
     
     public void printList(boolean info){
         File arbolDir[]=ruta.listFiles();
+        if(arbolDir.length==0){
+            System.out.println("--- Directorio vacío ---");
+        }
         if(info==false){
             Arrays.sort(arbolDir);
             for(File s : arbolDir){
@@ -59,11 +69,24 @@ public class MiniFileManager {
         }
     }
     
-    public boolean makeDir(String dir){
-        return (new File(dir)).mkdir();   
+    public boolean makeDir(String dir) throws FicheroNoEncontrado{
+        if(dir.contains("\\")){
+            if(!((new File(dir)).getParentFile().exists())){
+                throw new FicheroNoEncontrado("Ruta al fichero especificado no existe. Creación de directorio fallida.");
+            }
+            return (new File(dir)).mkdir(); //Para crear nuevo directorio dentro la ruta absoluta dada.
+        }else{
+            return new File(ruta.getAbsolutePath()+"\\"+dir).mkdir(); //Para crear nuevo directorio dentro del actual cuando la orden es dada mediante direccionamiento relativo.
+        }
     }
     
-    public boolean deleteDir(File dir){
+    public boolean deleteDir(File dir) throws FicheroNoEncontrado{
+        if(!(dir.toString().contains("\\"))){
+           dir=new File(ruta.getAbsolutePath()+"\\"+dir);
+        }
+        if(!dir.exists()){
+          throw new FicheroNoEncontrado("Ruta al fichero especificado no existe. No se pudo realizar la operación de borrar.");
+        }
         File contenido[]=dir.listFiles();
         if(dir.listFiles().length!=0){
             for(File f : contenido){
@@ -79,7 +102,18 @@ public class MiniFileManager {
         return dir.delete();   
     }
     
-    public boolean moveFile(File origen, File destino){
+    public boolean moveFile(File origen, File destino) throws FicheroNoEncontrado{
+        if(!(origen.toString().contains("\\"))){
+            origen=new File(ruta.getAbsolutePath()+"\\"+origen);
+        }
+        if(!(destino.toString().contains("\\"))){
+            destino=new File(ruta.getAbsolutePath()+"\\"+destino);
+        }
+        
+        if(!origen.exists() || !destino.getParentFile().exists()){
+          throw new FicheroNoEncontrado("Ruta al fichero especificado no existe. No se pudo mover o renombrar el directorio.");
+        }
+        
         return origen.renameTo(destino);
     }
     
