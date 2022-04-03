@@ -10,6 +10,7 @@ import java.util.Scanner;
 
 public class MiniTerminal {
     static Scanner teclado=new Scanner(System.in);
+    //Uso las líneas 14 y 15 como ruta de inicio, cambiándola depediendo del ordenador donde haga las pruebas.
     //static File carpeta_actual=new File("C:\\Users\\DAW\\PruebasMiniTerminal");
     static File carpeta_actual=new File("C:\\Users\\LUCÍA\\Downloads\\PRUEBAS");
     static MiniFileManager ruta_actual=new MiniFileManager(carpeta_actual);
@@ -18,10 +19,10 @@ public class MiniTerminal {
         String comando[], opcion;
         System.out.println("\nlopedevega@daw:~$ ");
         
-        opcion=teclado.nextLine();
+        opcion=teclado.nextLine(); //Lee lo introducido por teclado por el usuario y lo almacena en "opcion".
         
-        comando=opcion.split(" ");
-        
+        comando=opcion.split(" "); //Divide el String opcion en subcadenas cada vez que encuentre un 
+                                   //espacio (" ") y almacena cada una en una posición del Array comando[].         
         realizarComando(comando);      
     }
     

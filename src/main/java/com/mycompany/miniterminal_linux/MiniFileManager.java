@@ -30,7 +30,21 @@ public class MiniFileManager {
         return ruta.getAbsolutePath();
     }
     
-    public boolean changeDir(File dir) throws FicheroNoEncontrado{
+    /**
+     * Cambia la ruta que almacena el objeto MiniFileManager.
+     * 
+     * @param dir Recibe objeto de tipo File.
+     * @return Devuelve true si la ruta existe y false en caso contrario.
+     * @throws FicheroNoEncontrado Si File dir no existe.
+     * 
+     * LÍNEA 45 --> IF que permite trabajar con rutas relativas. Permite introducir el nombre de un
+     *              File que sea hijo directo del File al que apunta la ruta actual sin tener que 
+     *              escribir la ruta completa, ya que este método se la añade.
+     */
+    public boolean changeDir(File dir) throws FicheroNoEncontrado{  
+        if(!dir.toString().contains("\\")){
+            dir=new File(ruta.getAbsolutePath()+"\\"+dir);            
+        }        
         if(!dir.exists()){
           throw new FicheroNoEncontrado("Ruta al fichero especificado no existe. No se pudo cambiar el directorio activo.");
         }
@@ -38,12 +52,19 @@ public class MiniFileManager {
         return ruta.exists();
     }
     
+    /**
+     * Imprime listado de los directorios y ficheros contenidos en la ruta actual.
+     * 
+     * @param info Recibe boolean info. Si es 'false' imprime el listado solo con los nombres de 
+     *             los archivos contenidos en la ruta actual. Si info es 'true' imprime también el 
+     *             tamaño y fecha de última modificación de los mismos.
+     */
     public void printList(boolean info){
         File arbolDir[]=ruta.listFiles();
         if(arbolDir.length==0){
             System.out.println("--- Directorio vacío ---");
         }
-        if(info==false){
+        if(info==false){                //ACCIONES PARA INFO=FALSE;
             Arrays.sort(arbolDir);
             for(File s : arbolDir){
                 if(s.isDirectory()){
@@ -55,7 +76,7 @@ public class MiniFileManager {
                     System.out.println("[A] "+s.getName());
                 }    
             }//Fin FOR Files
-        }else{
+        }else{                          //ACCIONES PARA INFO=TRUE;
             for(File s : arbolDir){
                 if(s.isDirectory()){
                     System.out.println("[*] "+s.getName()+" --- Tamaño: "+s.length()+" --- Última modificación: "+new Date(s.lastModified()));
@@ -69,17 +90,33 @@ public class MiniFileManager {
         }
     }
     
+    /**
+     * Crea un directorio en la ruta dada.
+     * 
+     * @param dir String conteniendo la ruta (relativa o absoluta) del nuevo directorio a crear.
+     * @return Devuelve 'true' si el directorio ha sido creado correctamente. 'False' en caso contrario.
+     * @throws FicheroNoEncontrado Si la ruta padre del directorio que se pretende crear no existe.
+     */
     public boolean makeDir(String dir) throws FicheroNoEncontrado{
-        if(dir.contains("\\")){
+        if(dir.contains("\\")){    //ACCIONES SI dir CONTIENE RUTA ABSOLUTA;
             if(!((new File(dir)).getParentFile().exists())){
                 throw new FicheroNoEncontrado("Ruta al fichero especificado no existe. Creación de directorio fallida.");
             }
-            return (new File(dir)).mkdir(); //Para crear nuevo directorio dentro la ruta absoluta dada.
-        }else{
-            return new File(ruta.getAbsolutePath()+"\\"+dir).mkdir(); //Para crear nuevo directorio dentro del actual cuando la orden es dada mediante direccionamiento relativo.
+            return (new File(dir)).mkdir();
+        }else{                     //ACCIONES SI dir CONTIENE RUTA RELATIVA;
+            return new File(ruta.getAbsolutePath()+"\\"+dir).mkdir();
         }
     }
     
+    /**
+     * Borra ficheros o directorios que no contengan subdirectorios.
+     * 
+     * @param dir Recibe objeto de tipo File.
+     * @return Devuelve 'true' si el fichero o directorio ha sido borrado con éxito y 'false' en el
+     *         caso de que el directorio contenga subdirectorios en su interior o el borrado no haya
+     *         sido exitoso por cualquier otro motivo.
+     * @throws FicheroNoEncontrado Si la ruta recibida para borrar no existe.
+     */
     public boolean deleteDir(File dir) throws FicheroNoEncontrado{
         if(!(dir.toString().contains("\\"))){
            dir=new File(ruta.getAbsolutePath()+"\\"+dir);
@@ -94,14 +131,22 @@ public class MiniFileManager {
                     System.out.println("No es posible borrar el directorio seleccionado ya que contiene otros directorios o subcarpetas en su interior.");
                     return false;
                 }
-            }
+            }//Fin FOR Comprobación
             for(File f : contenido){
                 f.delete();
-            }
-        }        
+            }//Fin FOR para Borrar
+        }//Fin IF Directorio no vacío        
         return dir.delete();   
     }
-    
+        
+    /**
+     * Mueve o renombra un objeto de tipo File.
+     * 
+     * @param origen Objeto de tipo File que se desea renombrar o mover.
+     * @param destino Objeto de tipo File que contiene el destino al que se desea mover o el nuevo nombre.
+     * @return Devuelve 'true' si la operación de mover/renombrar se ha realizado con éxito. 'False' en caso contrario.
+     * @throws FicheroNoEncontrado Si la ruta de origen o la ruta padre de la de destino no existen.
+     */
     public boolean moveFile(File origen, File destino) throws FicheroNoEncontrado{
         if(!(origen.toString().contains("\\"))){
             origen=new File(ruta.getAbsolutePath()+"\\"+origen);
@@ -109,6 +154,11 @@ public class MiniFileManager {
         if(!(destino.toString().contains("\\"))){
             destino=new File(ruta.getAbsolutePath()+"\\"+destino);
         }
+        /*
+        Los anteriores dos IF´s permiten operar con rutas relativas. Si las rutas de los File 
+        recibidos no contienen '\' entonces suponemos que trabajamos sobre el directorio actual 
+        y se transforman a ruta absoluta.
+        */
         
         if(!origen.exists() || !destino.getParentFile().exists()){
           throw new FicheroNoEncontrado("Ruta al fichero especificado no existe. No se pudo mover o renombrar el directorio.");
